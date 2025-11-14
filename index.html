@@ -92,7 +92,7 @@
       container: 'map',
       style: 'https://tiles.openfreemap.org/styles/positron',
       zoom: 6.2,
-      center: [-120.5, 47.3]   
+      center: [-120.5, 47.3]
     });
 
     map.getCanvas().style.cursor = 'default';
@@ -115,14 +115,14 @@
             'fill-color': [
               'step',
               ['get', 'fullyVaxPer10k'],
-              '#FFF5F0',   // < 2000
-              2000, '#FEE0D2',
-              4000, '#FCBBA1',
-              6000, '#FC9272',
-              8000, '#FB6A4A',
-              9000, '#EF3B2C',
-              9500, '#CB181D',
-              9800, '#99000D'
+              '#f7fcf5',   
+              2000, '#e5f5e0',
+              4000, '#c7e9c0',
+              6000, '#a1d99b',
+              8000, '#74c476',
+              9000, '#41ab5d',
+              9500, '#238b45',
+              9800, '#005a32'
             ],
             'fill-outline-color': '#BBBBBB',
             'fill-opacity': 0.7
@@ -140,14 +140,14 @@
           '9,800 and more'
         ];
         const colors = [
-          '#FFF5F070',
-          '#FEE0D270',
-          '#FCBBA170',
-          '#FC927270',
-          '#FB6A4A70',
-          '#EF3B2C70',
-          '#CB181D70',
-          '#99000D70'
+          '#f7fcf570',
+          '#e5f5e070',
+          '#c7e9c070',
+          '#a1d99b70',
+          '#74c47670',
+          '#41ab5d70',
+          '#238b4570',
+          '#005a3270'
         ];
 
         const legend = document.getElementById('legend');
