@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>WA COVID-19 Fully Vaccinated Rate</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <script src="https://unpkg.com/maplibre-gl@^5.9.0/dist/maplibre-gl.js"></script>
+  <link href="https://unpkg.com/maplibre-gl@^5.9.0/dist/maplibre-gl.css" rel="stylesheet"/>
+
+  <style>
+    h2, h3 {
+      margin: 10px;
+      font-size: 18px;
+    }
+
+    h3 {
+      font-size: 16px;
+    }
+
+    p {
+      margin: 10px;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+    }
+
+    .map-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      background: rgba(255, 255, 255, 0.85);
+      border-style: solid;
+      border-width: 1px;
+      border-color: rgba(0, 0, 0, 0.2);
+      margin-left: 20px;
+      font-family: Arial, sans-serif;
+      overflow: auto;
+      border-radius: 3px;
+    }
+
+    #features {
+      top: 0;
+      height: 110px;
+      margin-top: 20px;
+      width: 260px;
+    }
+
+    #legend {
+      padding: 10px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      line-height: 18px;
+      height: 210px;
+      margin-bottom: 40px;
+      width: 190px;
+    }
+
+    .legend-key {
+      display: inline-block;
+      border-radius: 20%;
+      width: 10px;
+      height: 10px;
+      margin-right: 5px;
+    }
+
+    .maplibregl-canvas-container.maplibregl-interactive,
+    .maplibregl-ctrl-group button.maplibregl-ctrl-compass {
+      cursor: unset;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <div class="map-overlay" id="features">
+    <h2>WA COVID-19 Fully Vaccinated Rate</h2>
+    <div id="text-description">
+      <p>Hover over a county!</p>
+    </div>
+  </div>
+
+  <div class="map-overlay" id="legend"></div>
+
+  <script>
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: 'https://tiles.openfreemap.org/styles/positron',
+      zoom: 6.2,
+      center: [-120.5, 47.3]   
+    });
+
+    map.getCanvas().style.cursor = 'default';
+
+    async function geojsonFetch() {
+      let response = await fetch('assets/wa-covid-data-102521.geojson');
+      let covidData = await response.json();
+
+      map.on('load', () => {
+        map.addSource('covid', {
+          type: 'geojson',
+          data: covidData
+        });
+
+        map.addLayer({
+          id: 'covid-layer',
+          type: 'fill',
+          source: 'covid',
+          paint: {
+            'fill-color': [
+              'step',
+              ['get', 'fullyVaxPer10k'],
+              '#FFF5F0',   // < 2000
+              2000, '#FEE0D2',
+              4000, '#FCBBA1',
+              6000, '#FC9272',
+              8000, '#FB6A4A',
+              9000, '#EF3B2C',
+              9500, '#CB181D',
+              9800, '#99000D'
+            ],
+            'fill-outline-color': '#BBBBBB',
+            'fill-opacity': 0.7
+          }
+        });
+
+        const layers = [
+          '0–1,999',
+          '2,000–3,999',
+          '4,000–5,999',
+          '6,000–7,999',
+          '8,000–8,999',
+          '9,000–9,499',
+          '9,500–9,799',
+          '9,800 and more'
+        ];
+        const colors = [
+          '#FFF5F070',
+          '#FEE0D270',
+          '#FCBBA170',
+          '#FC927270',
+          '#FB6A4A70',
+          '#EF3B2C70',
+          '#CB181D70',
+          '#99000D70'
+        ];
+
+        const legend = document.getElementById('legend');
+        legend.innerHTML = '<b>Fully vaccinated per 10k people</b><br><br>';
+
+        layers.forEach((layer, i) => {
+          const color = colors[i];
+          const item = document.createElement('div');
+
+          const key = document.createElement('span');
+          key.className = 'legend-key';
+          key.style.backgroundColor = color;
+
+          const value = document.createElement('span');
+          value.innerHTML = layer;
+
+          item.appendChild(key);
+          item.appendChild(value);
+          legend.appendChild(item);
+        });
+
+        map.on('mousemove', ({ point }) => {
+          const county = map.queryRenderedFeatures(point, {
+            layers: ['covid-layer']
+          });
+
+          document.getElementById('text-description').innerHTML = county.length
+            ? `<h3>${county[0].properties.name}</h3>
+               <p><strong><em>${county[0].properties.fullyVaxPer10k}</strong> fully vaccinated per 10k people</em></p>`
+            : '<p>Hover over a county!</p>';
+        });
+      });
+    }
+
+    geojsonFetch();
+  </script>
+</body>
+</html>
